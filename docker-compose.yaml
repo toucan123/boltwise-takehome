@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - example-db:/var/lib/postgresql/data
+
+  main:
+    build: 
+      context: .
+    develop:
+      watch:
+        - action: rebuild
+          path: ./
+          target: /app/
+    environment:
+      DB_NAME: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_HOSTNAME: postgres
+    depends_on:
+      - postgres
+    ports:
+      - "3131:3131"
+      - "9229:9229"
+
+volumes:
+  example-db:
