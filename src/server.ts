@@ -2,10 +2,12 @@ import Fastify from 'fastify';
 import { routes } from './routes/products';
 import { initSellers } from './sellers/initSellers';
 import { initDb } from './db/postgresDb';
+import { swaggerPlugin } from './middlewares/swagger';
 
 const PORT = 3131;
 
 const app = Fastify();
+app.register(swaggerPlugin);
 app.register(routes);
 
 async function start() {

@@ -7,7 +7,6 @@ export class TypeboxValidator<Schema extends TSchema> {
   validator: ValidateFunction;
 
   constructor(schema: Schema) {
-    // These are things recommended by Typebox
     const typeboxAjv = addFormats(new Ajv({}), [
       'date-time',
       'time',
@@ -27,7 +26,6 @@ export class TypeboxValidator<Schema extends TSchema> {
       .addKeyword('kind')
       .addKeyword('modifier');
 
-    // Type.Strict omits kind and modifier properties
     this.validator = typeboxAjv.compile(Type.Strict(schema));
   }
 
