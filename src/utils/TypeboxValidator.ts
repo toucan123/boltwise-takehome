@@ -25,7 +25,6 @@ export class TypeboxValidator<Schema extends TSchema> {
     ])
       .addKeyword('kind')
       .addKeyword('modifier');
-
     this.validator = typeboxAjv.compile(Type.Strict(schema));
   }
 

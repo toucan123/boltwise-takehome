@@ -1,7 +1,7 @@
 import { Type, Static } from '@sinclair/typebox';
 import { db, pgp } from '../postgresDb';
-import { SearchProductsParams } from '../../controllers';
-import { ProductParams } from '../../controllers/types/Product';
+import { SearchProductsParams } from '../../controllers/product/ProductController';
+import { ProductParams } from '../../controllers/product/Product';
 import { TypeboxValidator } from '../../utils/TypeboxValidator';
 
 export const ProductRow = Type.Object({
@@ -14,11 +14,6 @@ export type ProductRow = Static<typeof ProductRow>;
 
 export const productRowValidator = new TypeboxValidator(ProductRow);
 
-const columnSet = new pgp.helpers.ColumnSet(
-  ['id', 'properties', 'available', 'batch'],
-  { table: 'products'}
-);
-
 export class ProductConnector {
   async getProductById(id: string): Promise<ProductRow | undefined> {
     const query = 'SELECT * FROM products WHERE id = $(id)';
@@ -27,7 +22,7 @@ export class ProductConnector {
   }
 
   async getProducts(params: SearchProductsParams): Promise<ProductRow[]> {
-    const filters = [];
+    const filters: string[] = ['available = TRUE'];
     const values: any = {};
     if (params.sellers) {
       filters.push(`properties->>'sellers' IN ($(sellers:csv))`);
@@ -54,22 +49,31 @@ export class ProductConnector {
       values.priceHigh = params.priceHigh;
     }
 
-    const whereClause = filters.length
-      ? `WHERE ${filters.join(' AND ')}`
-      : ``;
+    const whereClause = `WHERE ${filters.join(' AND ')}`;
     const query = `SELECT * FROM products ${whereClause}`;
     const products = await db.manyOrNone(query, values);
     return products.map(p => productRowValidator.validate(p));
   }
 
   async saveProducts(products: ProductRow[]): Promise<void> {
-    const insertQuery = pgp.helpers.insert(products, columnSet);
+    const insertColumnSet = new pgp.helpers.ColumnSet(
+      ['id', 'properties', 'available', 'batch'],
+      { table: 'products' }
+    );
+    const insertQuery = pgp.helpers.insert(products, insertColumnSet);
     const insertQueryWithUpdate = `${insertQuery}
       ON CONFLICT (id) DO UPDATE
       SET properties = EXCLUDED.properties,
           available = EXCLUDED.available,
           batch = EXCLUDED.batch`;
     await db.none(insertQueryWithUpdate);
+  }
+
+  async updateProduct(product: Omit<ProductRow, 'available' | 'batch'>): Promise<void> {
+    const updateQuery = `UPDATE products SET
+      properties = $(properties)
+      WHERE id = $(id)`;
+    await db.none(updateQuery, product);
   }
 
   async expireOldProducts(latestBatch: string): Promise<void> {

@@ -26,7 +26,22 @@ export const initDb = async () => {
         properties JSONB
       )
     `);
-  
+
+    await db.none(`
+      CREATE TABLE IF NOT EXISTS seller_batch (
+        seller character varying NOT NULL PRIMARY KEY,
+        batch character varying NULL
+      )
+    `);
+
+    await db.none(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id character varying NOT NULL PRIMARY KEY,
+        created_at timestamp NOT NULL,
+        updated_at timestamp NOT NULL,
+        properties JSONB
+      )
+    `);
     console.log('Tables created successfully.');
   } catch (error) {
     console.error('Error creating table:', error);

@@ -1,7 +1,7 @@
 import { Type, Static } from '@sinclair/typebox';
 import { TypeboxValidator } from '../../utils/TypeboxValidator';
 import { SellerProductInitializer } from '../SellerProductInitializer';
-import { Product } from '../../controllers/types/Product';
+import { Product } from '../../controllers/product/Product';
 
 const SourceProduct = Type.Object({
   item_number: Type.String(),

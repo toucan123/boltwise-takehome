@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse } from 'csv-parse';
-import { Product } from '../controllers/types/Product';
+import { Product } from '../controllers/product/Product';
 import { TypeboxValidator } from '../utils/TypeboxValidator';
 import { TSchema, Static } from '@sinclair/typebox';
-import { productController } from '../controllers/ProductController';
+import { productController } from '../controllers/product/ProductController';
+import { sellerBatchController } from '../controllers/sellerBatch/SellerBatchController';
+import { SellerBatch } from '../controllers/sellerBatch/SellerBatch';
 
 const fileNamePattern = /^(.+)-(\d{8})\.csv$/;
 
@@ -74,15 +76,34 @@ export class SellerProductInitializer<ProductSchema extends TSchema> {
 
   async run(): Promise<void> {
     const csvInfo = this.getMostRecentCsvFileInfo();
+
+    if (!csvInfo) {
+      console.log(`Could not parse files for ${this.sellerName}`);
+      return;
+    }
+    
+    const currentSellerBatch = await sellerBatchController.getBySeller(this.sellerName);
+    const sellerBatchToWrite = new SellerBatch({
+      seller: this.sellerName,
+      batch: csvInfo.stamp
+    });
+
+    if (!!currentSellerBatch && currentSellerBatch.batch === sellerBatchToWrite.batch) {
+      console.log(`Skipping ${sellerBatchToWrite.seller} batch ${sellerBatchToWrite.batch}, already added`);
+      return;
+    }
+
     const records = csvInfo
       ? await this.parseCsv(csvInfo.filename)
       : [];
 
     const products = this.parseProducts(records);
 
-    if (!products.length || !csvInfo) {
-      console.log(`Failed to find products for seller: ${this.sellerName} file: ${csvInfo?.filename}`);
+    if (!products.length) {
+      console.log(`Failed to find products for seller: ${this.sellerName} file: ${csvInfo.filename}`);
     } else {
+      
+      await sellerBatchController.saveSellerBatch(sellerBatchToWrite);
       await productController.saveProductsBatch(products, csvInfo.stamp);
     }
   }

@@ -1,6 +1,6 @@
 import { Type } from '@sinclair/typebox';
-import { SearchProductsParams } from '../../controllers';
-import { ProductParams } from '../../controllers/types/Product';
+import { SearchProductsParams } from '../../controllers/product/ProductController';
+import { ProductParams } from '../../controllers/product/Product';
 
 export const getProductByIdSchema = {
   schema: {
@@ -11,6 +11,15 @@ export const getProductByIdSchema = {
         description: 'Product not found',
         type: 'null'
       }
+    }
+  }
+}
+
+export const updateProductSchema = {
+  schema: {
+    body: ProductParams,
+    response: {
+      200: ProductParams
     }
   }
 }

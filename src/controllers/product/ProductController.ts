@@ -1,6 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
-import { productConnector } from '../db/connectors/ProductConnector';
-import { Product } from '../controllers/types/Product';
+import { productConnector } from '../../db/connectors/ProductConnector';
+import { Product } from './Product';
 
 export const SearchProductsParams = Type.Object({
   sellers: Type.Optional(Type.Array(Type.String())),
@@ -23,15 +23,13 @@ export class ProductController {
     return products?.map(p => new Product(p.properties)); 
   }
 
-  async saveProducts(products: Product[]) {
+  async updateProducts(products: Product[]): Promise<Product[]>{
     const productRows = products.map(p => ({
       id: p.id,
-      properties: p,
-      available: true,
-      batch: null
+      properties: p
     }));
-    const results = await productConnector.saveProducts(productRows);
-    console.log(results);
+    await Promise.all(productRows.map(p => productConnector.updateProduct(p)));
+    return products;
   }
 
   async saveProductsBatch(products: Product[], batch: string) {
@@ -41,8 +39,8 @@ export class ProductController {
       available: true,
       batch
     }));
-    const saveResults = await productConnector.saveProducts(productRows);
-    const results = await productConnector.expireOldProducts(batch);
+    await productConnector.saveProducts(productRows);
+    await productConnector.expireOldProducts(batch);
   }
 }
 
