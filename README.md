@@ -33,6 +33,6 @@ This folder contains the seller csvs and the parsers that we need to create for 
 Only "new" seller CSVs will be processed (when the server starts).  If you restart the sever 
 
 ## notes on concurrency 
-When using POST /order to place an order or POST product/:id/inventory to update product inventory these opperations are queued for processing one at a time.  Inventory updates are prioritized.  
+When using POST /orders to place an order or POST products/:id/inventory to update product inventory these opperations are queued for processing one at a time.  Inventory updates are prioritized.  
 
-POST /order will return an order back to the client with 'pending' status.  For now you'll have to GET /order/:id to check on the status of the order but in a real system we may want the client and server to communicate via web socket.  
+POST /orders will return an order back to the client with 'pending' status.  For now you'll have to GET /order/:id to check on the status of the order but in a real system we may want the client and server to communicate via web socket.  
