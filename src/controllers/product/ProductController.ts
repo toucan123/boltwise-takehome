@@ -1,6 +1,8 @@
 import { Type, Static } from '@sinclair/typebox';
 import { productConnector } from '../../db/connectors/ProductConnector';
 import { Product } from './Product';
+import { ProductInventoryUpdate } from './ProductInventoryUpdate';
+import { queueController } from '../../redis/QueueController';
 
 export const SearchProductsParams = Type.Object({
   sellers: Type.Optional(Type.Array(Type.String())),
@@ -32,10 +34,6 @@ export class ProductController {
     return products;
   }
 
-  async updateProductInventory(productId: string, changeQuantity: number) {
-    await productConnector.updateProductInventory(productId, changeQuantity);
-  }
-
   async saveProductsBatch(products: Product[], batch: string) {
     const productRows = products.map(p => ({
       id: p.id,
@@ -45,6 +43,22 @@ export class ProductController {
     }));
     await productConnector.saveProducts(productRows);
     await productConnector.expireOldProducts(batch);
+  }
+  
+  async createProductInventoryUpdate(productInventoryUpdate: ProductInventoryUpdate) {
+    await queueController.enqueueInventoryUpdate(productInventoryUpdate);
+  }
+
+  static async processProductInventoryUpdate(productInventoryUpdate: ProductInventoryUpdate) {
+    const { productId, quantity } = productInventoryUpdate;
+    const product = await productConnector.getProductById(productId);
+    if (product) {
+      product.properties.quantity = Math.max(0, product.properties.quantity + quantity);
+      await productConnector.updateProduct({
+        id: product.id,
+        properties: product.properties
+      });
+    }
   }
 }
 

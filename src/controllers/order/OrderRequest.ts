@@ -15,7 +15,7 @@ export type OrderRequestParams = Static<typeof OrderRequestParams>;
 export class OrderRequest implements OrderRequestParams {
   readonly productQuantities: ProductQuantities;
   
-  constructor(params: OrderRequest) {
+  constructor(params: OrderRequestParams) {
     this.productQuantities = params.productQuantities;
   }
 }

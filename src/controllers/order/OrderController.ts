@@ -1,21 +1,11 @@
 import { Order, OrderStatuses } from './Order';
 import { OrderRequestParams } from './OrderRequest';
 import { Product } from '../product/Product';
-import { QueueController } from '../../redis/QueueController';
+import { queueController } from '../../redis/QueueController';
 import { productController } from '../product/ProductController';
 import { orderConnector } from '../../db/connectors/OrderConnector';
 
 export class OrderController {
-  orderQueue: QueueController<Order>;
-
-  constructor() {
-    this.orderQueue = new QueueController({
-      name: 'Orders',
-      processor: this.processOrder.bind(this),
-      ItemConstructor: Order,
-    });
-  }
-
   async getOrderById(id: string): Promise<Order | undefined> {
     const order = await orderConnector.getOrderById(id);
     return order ? new Order(order.properties) : undefined;
@@ -29,11 +19,11 @@ export class OrderController {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
-    await this.orderQueue.enqueue(order);
+    await queueController.enqueueOrder(order);
     return order;
   }
 
-  async processOrder(order: Order) {
+  static async processOrder(order: Order) {
     const updatedOrder = order.clone();
     const productIds = Object.keys(order.productQuantities);
 
@@ -68,12 +58,6 @@ export class OrderController {
       updated_at: new Date().toISOString(),
     });
   }
-
-  async runOrderProcessor() {
-    this.orderQueue.run();
-  }
 }
 
 export const orderController = new OrderController();
-
-orderController.runOrderProcessor();

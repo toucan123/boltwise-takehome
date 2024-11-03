@@ -16,11 +16,17 @@ export const routes = async (fastifyInstance: FastifyInstance) => {
   });
 
   router.post('/products/:id/inventory/add', updateInventoryProductSchema, async (req, res) => {
-    await productController.updateProductInventory(req.params.id, req.body.quantity);
+    await productController.createProductInventoryUpdate({
+      productId: req.params.id,
+      quantity: req.body.quantity
+    });
   });
 
   router.post('/products/:id/inventory/remove', updateInventoryProductSchema, async (req, res) => {
-    await productController.updateProductInventory(req.params.id, req.body.quantity * -1);
+    await productController.createProductInventoryUpdate({
+      productId: req.params.id,
+      quantity: req.body.quantity * -1
+    });
   });
 
   router.get('/products/:id', getProductByIdSchema, async (req, res) => {
