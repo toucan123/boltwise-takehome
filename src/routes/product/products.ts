@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
 import { productController } from '../../controllers/product/ProductController';
-import { updateProductSchema, getProductByIdSchema, searchProductsSchema } from './schemas';
+import { updateInventoryProductSchema, getProductByIdSchema, searchProductsSchema } from './schemas';
 import { Product } from '../../controllers/product/Product';
 import { ErrorCodes } from '../../utils/errors';
 
@@ -15,10 +15,12 @@ export const routes = async (fastifyInstance: FastifyInstance) => {
     res.send({ results: products });
   });
 
-  router.put('/products/:id', updateProductSchema, async (req, res) => {
-    const product = new Product(req.body);
-    const products = await productController.updateProducts([product]);
-    res.send(products[0]);
+  router.post('/products/:id/inventory/add', updateInventoryProductSchema, async (req, res) => {
+    await productController.updateProductInventory(req.params.id, req.body.quantity);
+  });
+
+  router.post('/products/:id/inventory/remove', updateInventoryProductSchema, async (req, res) => {
+    await productController.updateProductInventory(req.params.id, req.body.quantity * -1);
   });
 
   router.get('/products/:id', getProductByIdSchema, async (req, res) => {

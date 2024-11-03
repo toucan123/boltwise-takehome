@@ -76,6 +76,19 @@ export class ProductConnector {
     await db.none(updateQuery, product);
   }
 
+  async updateProductInventory(productId: string, quantityChange: number) {
+    const updateQuery = `UPDATE products
+      SET properties = jsonb_set(
+        properties,
+        '{quantity}',
+        to_jsonb(GREATEST((COALESCE((properties->>'quantity')::int, 0) + $(quantityChange)), 0)),
+        true
+      )
+      WHERE id = $(productId)
+    `;
+    await db.none(updateQuery, { productId, quantityChange });
+  }
+
   async expireOldProducts(latestBatch: string): Promise<void> {
     const query = `UPDATE products 
       SET available = FALSE

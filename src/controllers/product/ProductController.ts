@@ -32,6 +32,10 @@ export class ProductController {
     return products;
   }
 
+  async updateProductInventory(productId: string, changeQuantity: number) {
+    await productConnector.updateProductInventory(productId, changeQuantity);
+  }
+
   async saveProductsBatch(products: Product[], batch: string) {
     const productRows = products.map(p => ({
       id: p.id,

@@ -15,9 +15,10 @@ export const getProductByIdSchema = {
   }
 }
 
-export const updateProductSchema = {
+export const updateInventoryProductSchema = {
   schema: {
-    body: ProductParams,
+    params: Type.Object({ id: Type.String() }),
+    body: Type.Object({ quantity: Type.Number() }),
     response: {
       200: ProductParams
     }
