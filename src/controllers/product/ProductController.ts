@@ -2,7 +2,7 @@ import { Type, Static } from '@sinclair/typebox';
 import { productConnector } from '../../db/connectors/ProductConnector';
 import { Product } from './Product';
 import { ProductInventoryUpdate } from './ProductInventoryUpdate';
-import { queueController } from '../../redis/QueueController';
+import { queueController } from '../../queue/QueueController';
 
 export const SearchProductsParams = Type.Object({
   sellers: Type.Optional(Type.Array(Type.String())),
@@ -44,7 +44,7 @@ export class ProductController {
     await productConnector.saveProducts(productRows);
     await productConnector.expireOldProducts(batch);
   }
-  
+
   async createProductInventoryUpdate(productInventoryUpdate: ProductInventoryUpdate) {
     await queueController.enqueueInventoryUpdate(productInventoryUpdate);
   }

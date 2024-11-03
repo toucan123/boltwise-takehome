@@ -3,9 +3,9 @@ import pgPromise from 'pg-promise';
 const PG_PORT = 5432;
 
 export const pgp = pgPromise({
-  query(e) {
-    console.log(e.query);
-  }
+  // query(e) {
+  //   console.log(e.query);
+  // }
 });
 
 export const db = pgp({

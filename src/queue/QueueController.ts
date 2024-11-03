@@ -75,7 +75,9 @@ export class QueueController {
       const data = await client.zPopMax(QUEUE_KEY);
       if (data) {
         const item = queueItemValidator.validate(JSON.parse(data.value));
+        
         console.log(`+++++++ Processing ${item.type} ++++++`);
+        
         if (item.type === QueueItemTypes.INVENTORY_UPDATE) {
           await ProductController.processProductInventoryUpdate(item.item);
         } else if (item.type === QueueItemTypes.ORDER) {

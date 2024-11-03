@@ -1,7 +1,7 @@
 import { Order, OrderStatuses } from './Order';
 import { OrderRequestParams } from './OrderRequest';
 import { Product } from '../product/Product';
-import { queueController } from '../../redis/QueueController';
+import { queueController } from '../../queue/QueueController';
 import { productController } from '../product/ProductController';
 import { orderConnector } from '../../db/connectors/OrderConnector';
 
