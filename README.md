@@ -19,7 +19,32 @@ Adding new products (POST /products) was left out assuming all new products will
 
 Products can be searched by their properies or you can add remove inventory (quantity) from products. 
 
+Here's an example post body for a product search:
+
+```
+{
+  "categories": [
+    "Hex Cap Screw"
+  ],
+  "finishes": [
+    "Zinc"
+  ],
+  "priceHigh": 1.50
+}
+```
+
 Order can be created or looked up by id.
+
+Here's an example post body for an order:
+
+```
+{
+  "productQuantities": {
+    "7d9004b6edd537755ec217f1325ab307": 20,
+    "03d4a0effe1e844f5cebf2e4e8014961": 40
+  }
+}
+```
 
 Notes on how concurrent inventory updates and orders are processed can be found in a different section.  
 
@@ -42,3 +67,6 @@ POST /orders will return an order back to the client with a 'pending' status. Af
 For now you'll have to make a subsequent GET /order/:id request to check on the changed status of the order but in a real system this may be web socket communication between server and client. 
 
 In a real system there would likely be other stages of processing the order like adding payment and shipping details, commiting/completing the transaction or expiring it (returning the inventory back to the products).  There may come a need to create a different data model for carts vs orders.  
+
+# notes on a recomender
+I didn't build a recomender for inventory but one way to achieve that would be to add the Vector extension to postgres (pgvector) add a Vector column to the products table that could store an embedding vector generated from the product attributes we care about.  We could then leverage an LLM to help us generate some product attributes then generate embeddings for those (along with the natural language question) and get the closest similar products from the db.  The LLM would likely also benefit from having the context of existing product finishes and categories (maybe then being able to suggest finsish:Zinc for "best outdoor use").  If there are a lot of these though that could pose performance and quality problems.

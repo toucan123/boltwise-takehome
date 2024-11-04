@@ -103,7 +103,7 @@ export class SellerProductInitializer<ProductSchema extends TSchema> {
       console.log(`Failed to find products for seller: ${this.sellerName} file: ${csvInfo.filename}`);
     } else {
       await sellerBatchController.saveSellerBatch(sellerBatchToWrite);
-      await productController.saveProductsBatch(products, sellerBatchToWrite.id);
+      await productController.saveProductsBatch(products, sellerBatchToWrite);
     }
   }
 }

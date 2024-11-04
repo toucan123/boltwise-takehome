@@ -6,7 +6,8 @@ import { TypeboxValidator } from '../../utils/TypeboxValidator';
 
 export const ProductRow = Type.Object({
   id: Type.String(),
-  batch: Type.Union([Type.String(), Type.Null()]),
+  seller: Type.String(),
+  batch: Type.String(),
   available: Type.Boolean(),
   properties: ProductParams,
 });
@@ -57,7 +58,7 @@ export class ProductConnector {
 
   async saveProducts(products: ProductRow[]): Promise<void> {
     const insertColumnSet = new pgp.helpers.ColumnSet(
-      ['id', 'properties', 'available', 'batch'],
+      ['id', 'properties', 'available', 'seller', 'batch'],
       { table: 'products' }
     );
     const insertQuery = pgp.helpers.insert(products, insertColumnSet);
@@ -69,18 +70,19 @@ export class ProductConnector {
     await db.none(insertQueryWithUpdate);
   }
 
-  async updateProduct(product: Omit<ProductRow, 'available' | 'batch'>): Promise<void> {
+  async updateProduct(product: Omit<ProductRow, 'available' | 'batch' | 'seller'>): Promise<void> {
     const updateQuery = `UPDATE products SET
       properties = $(properties)
       WHERE id = $(id)`;
     await db.none(updateQuery, product);
   }
 
-  async expireOldProducts(latestBatch: string): Promise<void> {
+  async expireOldProducts(seller: string, batch: string): Promise<void> {
     const query = `UPDATE products 
       SET available = FALSE
-      WHERE batch != $(batch)`;
-    await db.none(query, { batch: latestBatch });
+      WHERE seller = $(seller)
+      AND batch != $(batch)`;
+    await db.none(query, { seller, batch });
   }
 }
 

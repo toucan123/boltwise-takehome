@@ -21,7 +21,8 @@ export const initDb = async () => {
     await db.none(`
       CREATE TABLE IF NOT EXISTS products (
         id character varying NOT NULL PRIMARY KEY,
-        batch character varying NULL,
+        seller character varying NOT NULL,
+        batch character varying NOT NULL, 
         available BOOLEAN NOT NULL,
         properties JSONB
       )

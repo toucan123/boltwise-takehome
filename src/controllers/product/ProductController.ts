@@ -1,8 +1,9 @@
 import { Type, Static } from '@sinclair/typebox';
-import { productConnector } from '../../db/connectors/ProductConnector';
+import { productConnector, ProductRow } from '../../db/connectors/ProductConnector';
 import { Product } from './Product';
 import { ProductInventoryUpdate } from './ProductInventoryUpdate';
 import { queueController } from '../../queue/QueueController';
+import { SellerBatch } from '../sellerBatch/SellerBatch';
 
 export const SearchProductsParams = Type.Object({
   sellers: Type.Optional(Type.Array(Type.String())),
@@ -34,15 +35,16 @@ export class ProductController {
     return products;
   }
 
-  async saveProductsBatch(products: Product[], batch: string) {
-    const productRows = products.map(p => ({
+  async saveProductsBatch(products: Product[], sellerBatch: SellerBatch) {
+    const productRows: ProductRow[] = products.map(p => ({
       id: p.id,
+      seller: p.seller,
       properties: p,
       available: true,
-      batch
+      batch: sellerBatch.id
     }));
     await productConnector.saveProducts(productRows);
-    await productConnector.expireOldProducts(batch);
+    await productConnector.expireOldProducts(sellerBatch.seller, sellerBatch.id);
   }
 
   async createProductInventoryUpdate(productInventoryUpdate: ProductInventoryUpdate) {
