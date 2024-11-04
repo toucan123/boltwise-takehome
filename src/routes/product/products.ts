@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
 import { productController } from '../../controllers/product/ProductController';
 import { updateInventoryProductSchema, getProductByIdSchema, searchProductsSchema } from './schemas';
-import { Product } from '../../controllers/product/Product';
 import { ErrorCodes } from '../../utils/errors';
 
 export const routes = async (fastifyInstance: FastifyInstance) => {

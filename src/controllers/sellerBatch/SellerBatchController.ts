@@ -7,7 +7,8 @@ export class SellerBatchController {
     return sellerBatch ? new SellerBatch(sellerBatch) : undefined;
   }
   
-  async saveSellerBatch(sellerBatch: SellerBatchParams): Promise<SellerBatch | undefined> {
+  async saveSellerBatch(sellerBatchParams: SellerBatchParams): Promise<SellerBatch | undefined> {
+    const sellerBatch = new SellerBatch(sellerBatchParams);
     await sellerBatchConnector.saveSellerBatch(sellerBatch);
     return sellerBatch;
   }

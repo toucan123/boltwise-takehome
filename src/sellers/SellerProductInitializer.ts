@@ -46,7 +46,7 @@ export class SellerProductInitializer<ProductSchema extends TSchema> {
         mostRecentFileName = fileName;
       }
     }
-    return mostRecentStamp && mostRecentFileName 
+    return mostRecentStamp && mostRecentFileName
       ? {
         stamp: mostRecentStamp,
         filename: mostRecentFileName,
@@ -81,15 +81,15 @@ export class SellerProductInitializer<ProductSchema extends TSchema> {
       console.log(`Could not parse files for ${this.sellerName}`);
       return;
     }
-    
+
     const currentSellerBatch = await sellerBatchController.getBySeller(this.sellerName);
     const sellerBatchToWrite = new SellerBatch({
       seller: this.sellerName,
-      batch: csvInfo.stamp
+      stamp: csvInfo.stamp
     });
 
-    if (!!currentSellerBatch && currentSellerBatch.batch === sellerBatchToWrite.batch) {
-      console.log(`Skipping ${sellerBatchToWrite.seller} batch ${sellerBatchToWrite.batch}, already added`);
+    if (!!currentSellerBatch && currentSellerBatch.id === sellerBatchToWrite.id) {
+      console.log(`Skipping ${sellerBatchToWrite.seller} batch ${sellerBatchToWrite.stamp}, already added`);
       return;
     }
 
@@ -102,9 +102,8 @@ export class SellerProductInitializer<ProductSchema extends TSchema> {
     if (!products.length) {
       console.log(`Failed to find products for seller: ${this.sellerName} file: ${csvInfo.filename}`);
     } else {
-      
       await sellerBatchController.saveSellerBatch(sellerBatchToWrite);
-      await productController.saveProductsBatch(products, csvInfo.stamp);
+      await productController.saveProductsBatch(products, sellerBatchToWrite.id);
     }
   }
 }

@@ -30,7 +30,8 @@ export const initDb = async () => {
     await db.none(`
       CREATE TABLE IF NOT EXISTS seller_batch (
         seller character varying NOT NULL PRIMARY KEY,
-        batch character varying NULL
+        stamp character varying NOT NULL,
+        id character varying NOT NULL UNIQUE
       )
     `);
 

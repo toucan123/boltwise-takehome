@@ -1,24 +1,10 @@
 import { Type, Static } from '@sinclair/typebox';
-import { createClient } from 'redis';
 import { Order, OrderParams } from '../controllers/order/Order';
 import { OrderController } from '../controllers/order/OrderController';
 import { ProductController } from '../controllers/product/ProductController';
 import { ProductInventoryUpdateParams } from '../controllers/product/ProductInventoryUpdate';
 import { TypeboxValidator } from '../utils/TypeboxValidator';
-
-const client = createClient({
-  url: `redis://${process.env.QUEUE_HOSTAME}:6379`
-});
-
-client.on('ready', (err) => {
-  console.log(`Connecting to redis...`);
-});
-
-client.on('error', (err) => {
-  console.log(`Redis error ${JSON.stringify(err)}`)
-});
-
-client.connect();
+import { redis } from './redis';
 
 export enum QueueItemTypes {
   ORDER = 'order',
@@ -51,7 +37,7 @@ const LOCK_KEY = `${QUEUE_KEY}::lock`;
 
 export class QueueController {
   private async acquireLock(): Promise<boolean> {
-    const result = await client.set(
+    const result = await redis.set(
       LOCK_KEY, 
       "1", 
       {
@@ -63,7 +49,7 @@ export class QueueController {
   }
   
   private async releaseLock(): Promise<void> {
-    await client.del(LOCK_KEY);
+    await redis.del(LOCK_KEY);
   }
  
   private async process(){
@@ -72,11 +58,11 @@ export class QueueController {
       return;
     }
     try {
-      const data = await client.zPopMax(QUEUE_KEY);
+      const data = await redis.zPopMax(QUEUE_KEY);
       if (data) {
         const item = queueItemValidator.validate(JSON.parse(data.value));
         
-        console.log(`+++++++ Processing ${item.type} ++++++`);
+        console.log(`processing ${item.type}`);
         
         if (item.type === QueueItemTypes.INVENTORY_UPDATE) {
           await ProductController.processProductInventoryUpdate(item.item);
@@ -104,9 +90,10 @@ export class QueueController {
   }
 
   async enqueue(item: QueueItem) {
+    // Prioritize inventory updates over orders
     const score = item.type === QueueItemTypes.INVENTORY_UPDATE ? 1 : 0;
     const value = JSON.stringify(item);
-    await client.zAdd(QUEUE_KEY, { score, value });
+    await redis.zAdd(QUEUE_KEY, { score, value });
   }
 
   async run() {

@@ -3,8 +3,9 @@ import { db, pgp } from '../postgresDb';
 import { TypeboxValidator } from '../../utils/TypeboxValidator';
 
 export const SellerBatchRow = Type.Object({
+  id: Type.String(),
   seller: Type.String(),
-  batch: Type.String(),
+  stamp: Type.String(),
 });
 export type SellerBatchRow = Static<typeof SellerBatchRow>;
 
@@ -19,13 +20,14 @@ export class SellerBatchConnector {
 
   async saveSellerBatch(sellerBatch: SellerBatchRow): Promise<void> {
     const insertColumnSet = new pgp.helpers.ColumnSet(
-      ['seller', 'batch'],
+      ['seller', 'stamp', 'id'],
       { table: 'seller_batch' }
     );
     const insertQuery = pgp.helpers.insert(sellerBatch, insertColumnSet);
     const insertQueryWithUpdate = `${insertQuery}
       ON CONFLICT (seller) DO UPDATE
-      SET batch = EXCLUDED.batch`;
+      SET stamp = EXCLUDED.stamp,
+          id = EXCLUDED.id`;
     await db.none(insertQueryWithUpdate);
   }
 }
