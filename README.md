@@ -62,11 +62,11 @@ Only "new" seller CSVs will be processed (when the server starts).  This is cont
 ## notes on concurrency 
 When using POST /orders to place an order or POST products/:id/inventory to update product inventory these opperations are queued for processing one at a time (but direct inventory updates are prioritized).
 
-POST /orders will return an order back to the client with a 'pending' status. After it is processed it will have an 'initiated' status.  
+POST /orders will return an order back to the client with a 'pending' status. After it is processed it will have an 'initiated' status if successful or a 'failure' status if it failed for a reason like requesting a quantity greater than what is available.
 
 For now you'll have to make a subsequent GET /order/:id request to check on the changed status of the order but in a real system this may be web socket communication between server and client. 
 
 In a real system there would likely be other stages of processing the order like adding payment and shipping details, commiting/completing the transaction or expiring it (returning the inventory back to the products).  There may come a need to create a different data model for carts vs orders.  
 
 # notes on a recomender
-I didn't build a recomender for inventory but one way to achieve that would be to add the Vector extension to postgres (pgvector) add a Vector column to the products table that could store an embedding vector generated from the product attributes we care about.  We could then leverage an LLM to help us generate some product attributes then generate embeddings for those (along with the natural language question) and get the closest similar products from the db.  The LLM would likely also benefit from having the context of existing product finishes and categories (maybe then being able to suggest finsish:Zinc for "best outdoor use").  If there are a lot of these though that could pose performance and quality problems.
+I didn't build a recomender for inventory but one way to achieve that would be to add the Vector extension to postgres (pgvector) add a Vector column to the products table that could store an embedding vector generated from the product attributes we care about.  We could then leverage an LLM to help us generate some product attributes then generate embeddings for those (along with the natural language question) and get the closest similar products from the db.  The LLM would likely also benefit from having the context of existing product finishes and categories (maybe then being able to suggest finish:Zinc for "best outdoor use").  If there are a lot of these though that could pose performance and quality problems.
