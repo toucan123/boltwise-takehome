@@ -2,7 +2,9 @@
 
 Candidate: Jeff Roach
 
-This repo implements a service that supports an API for managing product inventory and orders.  
+This repo implements a service that supports an API for managing product inventory and orders.
+
+Prompt: https://you.ashbyhq.com/boltwise/assignment/2bedc393-596b-4262-8dcf-35c2205b0ad1
 
 ## How to run: 
 
