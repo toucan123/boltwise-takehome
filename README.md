@@ -19,7 +19,7 @@ This folder contains the /products and /orders routes which you can see document
 
 Adding new products (POST /products) was left out assuming all new products will source from the CSVs. 
 
-Products can be searched by their properties or you can add remove inventory (quantity) from products. 
+Products can be searched by their properties with POST /products/search or you can add/remove inventory with POST /products/:id/add and POST /products/:id/remove
 
 Here's an example post body for a product search:
 
@@ -35,9 +35,9 @@ Here's an example post body for a product search:
 }
 ```
 
-Order can be created or looked up by id.
+Orders can be created or looked up by id.
 
-Here's an example post body for an order:
+Here's an example post body for an order for POST /orders:
 
 ```
 {
